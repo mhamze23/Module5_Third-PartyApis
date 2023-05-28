@@ -1,53 +1,40 @@
-var hour9 = $("#9AM");
-var hour10 = $("#10AM");
-var hour11 = $("#11AM");
-var hour12 = $("#12PM");
-var hour1 = $("#1PM");
-var hour2 = $("#2PM");
-var hour3 = $("#3PM");
-var hour4 = $("#4PM");
-var hour5 = $("#5PM");
-var time = dayjs();
+// Define today's date and current hour using the Day.js library
+const today = dayjs();
+const currentHour = today.hour();
 
-function setPlanner() {
+// Execute when document is ready
+$(function() {
+  // Display and format the current day at the top of the page
+  // Note that 'dddd, MMMM D' formats the date as 'day of week, month day'
+  $('#currentDay').text(today.format('dddd, MMMM D') + 'th');
 
-    $("#currentDay").text(dayjs().format("YYYY-MM-DD"));
+  // Create an array of hours from 9 to 17 for typical workday hours
+  const hours = Array.from({length: 9}, (_, i) => i + 9);
 
-    $(".time-block").each(function () {
-        var id = $(this).attr("id");
-        var content = localStorage.getItem(id);
+  // Iterate over each hour in the hours array
+  hours.forEach(hour => {
+    // Define the textarea and button for each hour block
+    const container = $(`#hour-${hour}`);
+    const textarea = container.children('textarea');
+    const button = container.children('button');
 
-        if (content !== null) {
-            $(this).children(".content").val(content);
-        }
+    // Apply past, present, or future CSS classes to each hour block based on the current hour
+    if (currentHour > hour) {
+      container.addClass('past');
+    } else if (currentHour === hour) {
+      container.addClass('present');
+    } else {
+      container.addClass('future');
+    }
+
+    // Retrieve and display stored values from local storage
+    textarea.val(localStorage.getItem(`hour${hour}`));
+
+    // Attach a click event listener to the save button
+    // When the button is clicked, the corresponding textarea content will be saved to local storage
+    button.on('click', function() {
+      const text = textarea.val();
+      localStorage.setItem(`hour${hour}`, text);
     });
-}
-
-setPlanner();
-var saveBtn = $(".saveBtn");
-
-saveBtn.on("click", function () {
-    var time = $(this).parent().attr("id");
-    var schedule = $(this).siblings(".content").val();
-
-    localStorage.setItem(time, schedule);
+  });
 });
-
-function pastPresentFuture() {
-    hour = time.hours();
-    $(".time-block").each(function () {
-        var thisHour = parseInt($(this).attr("id"));
-
-        if (thisHour > hour) {
-            $(this).addClass("future")
-        }
-        else if (thisHour === hour) {
-            $(this).addClass("present");
-        }
-        else {
-            $(this).addClass("past");
-        }
-    })
-}
-
-pastPresentFuture();
